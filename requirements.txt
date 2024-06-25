@@ -1,0 +1,15 @@
+functions-framework==3.*
+flask==2.*
+psycopg2-binary==2.*
+embedchain==0.1.112
+neo4j
+PyGithub
+portkey_ai
+asyncio
+uvicorn==0.27.0
+langchain
+langchain-community
+langchain-openai
+langchain-experimental
+fastapi
+psycopg

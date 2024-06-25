@@ -1,0 +1,6 @@
+.venv
+.hypothesis
+__pycache__
+.DS_Store
+.env
+.vscode
