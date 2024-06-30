@@ -5,11 +5,12 @@ from flow import understand_flows  # Ensure this is correctly imported
 import asyncio
 import logging
 from knowledge_graph import KnowledgeGraph
+import os
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-BROKER_URL = 'redis://localhost:6379/0'
+BROKER_URL = os.getenv("BROKER_URL")
 celery = Celery('KnowledgeGraph', broker=BROKER_URL)
 
 class FlowInferenceRequest(BaseModel):
