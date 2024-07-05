@@ -1,7 +1,6 @@
 from embedchain.loaders.postgres import PostgresLoader
 from embedchain import App
 import os
-import psycopg2
 
 class KnowledgeGraph:
     _instance = None

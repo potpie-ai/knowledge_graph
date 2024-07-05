@@ -13,3 +13,10 @@ langchain-openai
 langchain-experimental
 fastapi
 psycopg
+celery
+redis
+kombu==5.4.0rc1
+embedchain[weaviate]
+celery[redis] 
+pydantic 
+eventlet
