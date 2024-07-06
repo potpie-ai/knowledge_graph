@@ -4,7 +4,8 @@ from flow import understand_flows
 from knowledge_graph import KnowledgeGraph
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(verbose=True, override=True)
+
 app = FastAPI()
 class QueryRequest(BaseModel):
     project_id: str

@@ -6,6 +6,9 @@ import asyncio
 import logging
 from knowledge_graph import KnowledgeGraph
 import os
+from dotenv import load_dotenv
+
+load_dotenv(verbose=True, override=True)
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)

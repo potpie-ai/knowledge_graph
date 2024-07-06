@@ -20,5 +20,6 @@ class KnowledgeGraph:
         self.app.add(f"SELECT * FROM pydantic WHERE project_id={project_id};", data_type='postgres', loader=self.postgres_loader, metadata={"project_id": project_id})
 
     def query(self, query, project_id):
+        project_id = str(project_id) #needed because project_id is an int coming from request but required string in query for some reason.
         prefix = "Always INCLUDE ALL RELEVANT FILEPATH, FUNCTION NAME AND VARIABLE NAMES in your response. If you are asked about an API: ALWAYS include its HTTP verb and url path along with its identifier in the response: \n"
         return self.app.query(prefix+query, where={"project_id": project_id})
