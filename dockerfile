@@ -1,28 +1,23 @@
-# Use the official Python image as the base image
-FROM python:3.11-slim
+# Use an official Python runtime as a parent image
+FROM python:3.10-slim
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Update pip and install wheel
-RUN pip install --no-cache-dir --upgrade pip wheel setuptools
+# Copy the current directory contents into the container at /app
+COPY . /app
 
-# Create and activate virtual environment
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-
-# Copy and install the Python dependencies
-COPY requirements.txt .
+# Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the .env file and the application code into the container
-COPY .env .
-COPY . .
+# Install supervisor
+RUN apt-get update && apt-get install -y supervisor
 
-# Source the environment variables
-RUN set -a && . /app/.env && set +a
+# Copy the supervisord configuration file
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-EXPOSE 8080
+# Expose the port uvicorn will run on
+EXPOSE 8081
 
-# Command to run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Run supervisord
+CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

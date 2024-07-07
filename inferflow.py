@@ -15,7 +15,10 @@ logger = logging.getLogger(__name__)
 
 BROKER_URL = os.getenv("BROKER_URL")
 celery = Celery('KnowledgeGraph', broker=BROKER_URL)
-
+celery.conf.update(
+    worker_log_format="[%(asctime)s: %(levelname)s/%(processName)s] %(message)s",
+    worker_task_log_format="[%(asctime)s: %(levelname)s/%(processName)s] Task %(task_name)s[%(task_id)s] %(message)s",
+)
 class FlowInferenceRequest(BaseModel):
     project_id: int
     directory: str
