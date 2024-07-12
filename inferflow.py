@@ -8,6 +8,7 @@ from knowledge_graph import KnowledgeGraph
 import os
 from dotenv import load_dotenv
 import sentry_sdk
+import redis
 
 load_dotenv(verbose=True, override=True)
 
@@ -15,25 +16,37 @@ logging.basicConfig(level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 
-BROKER_URL = os.getenv("BROKER_URL")
+# Replace with your Redis instance IP and port
+REDISHOST = os.getenv("REDISHOST")
+REDISPORT = int(os.getenv("REDISPORT", 6379))
 
-celery = Celery('KnowledgeGraph', broker=BROKER_URL)
+# Initialize the Redis client
+redis_client = redis.StrictRedis(host=REDISHOST, port=REDISPORT)
+
+# Function to convert Redis client to URL
+def redis_client_to_url(client):
+    connection_pool = client.connection_pool
+    return f'redis://{connection_pool.connection_kwargs["host"]}:{connection_pool.connection_kwargs["port"]}/0'
+
+# Generate the Redis URL from the client
+REDIS_URL = redis_client_to_url(redis_client)
+
+celery = Celery('KnowledgeGraph', broker=REDIS_URL, backend=REDIS_URL)
 
 celery.conf.update(
     worker_log_format="[%(asctime)s: %(levelname)s/%(processName)s] %(message)s",
     worker_task_log_format="[%(asctime)s: %(levelname)s/%(processName)s] Task %(task_name)s[%(task_id)s] %(message)s",
     worker_heartbeat=120,  # Send a heartbeat every 120 seconds
-    
 )
 
 @signals.celeryd_init.connect
 def init_sentry(**_kwargs):
     sentry_sdk.init(
-        dsn= os.getenv("SENTRY_CELERY_DSN"),
+        dsn=os.getenv("SENTRY_CELERY_DSN"),
         traces_sample_rate=1.0,
         profiles_sample_rate=1.0,
-    ) 
-                
+    )
+
 class FlowInferenceRequest(BaseModel):
     project_id: int
     directory: str
