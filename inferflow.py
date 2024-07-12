@@ -22,6 +22,8 @@ celery = Celery('KnowledgeGraph', broker=BROKER_URL)
 celery.conf.update(
     worker_log_format="[%(asctime)s: %(levelname)s/%(processName)s] %(message)s",
     worker_task_log_format="[%(asctime)s: %(levelname)s/%(processName)s] Task %(task_name)s[%(task_id)s] %(message)s",
+    worker_heartbeat=120,  # Send a heartbeat every 120 seconds
+    
 )
 
 @signals.celeryd_init.connect
