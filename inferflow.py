@@ -1,5 +1,5 @@
 # inferflow.py
-from celery import Celery
+from celery import Celery, signals
 from pydantic import BaseModel
 from flow import understand_flows  # Ensure this is correctly imported
 import asyncio
@@ -7,18 +7,31 @@ import logging
 from knowledge_graph import KnowledgeGraph
 import os
 from dotenv import load_dotenv
+import sentry_sdk
 
 load_dotenv(verbose=True, override=True)
 
 logging.basicConfig(level=logging.DEBUG)
+
 logger = logging.getLogger(__name__)
 
 BROKER_URL = os.getenv("BROKER_URL")
+
 celery = Celery('KnowledgeGraph', broker=BROKER_URL)
+
 celery.conf.update(
     worker_log_format="[%(asctime)s: %(levelname)s/%(processName)s] %(message)s",
     worker_task_log_format="[%(asctime)s: %(levelname)s/%(processName)s] Task %(task_name)s[%(task_id)s] %(message)s",
 )
+
+@signals.celeryd_init.connect
+def init_sentry(**_kwargs):
+    sentry_sdk.init(
+        dsn= os.getenv("SENTRY_CELERY_DSN"),
+        traces_sample_rate=1.0,
+        profiles_sample_rate=1.0,
+    ) 
+                
 class FlowInferenceRequest(BaseModel):
     project_id: int
     directory: str
