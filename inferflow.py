@@ -32,13 +32,20 @@ else:
     REDIS_URL = f'redis://{REDISHOST}:{REDISPORT}/0'
 
 # Initialize the Celery worker
-celery = Celery('KnowledgeGraph', broker=REDIS_URL, backend=REDIS_URL)
+celery = Celery('KnowledgeGraph', broker=REDIS_URL)
 
 celery.conf.update(
     worker_log_format="[%(asctime)s: %(levelname)s/%(processName)s] %(message)s",
     worker_task_log_format="[%(asctime)s: %(levelname)s/%(processName)s] Task %(task_name)s[%(task_id)s] %(message)s",
     worker_heartbeat=120,  # Send a heartbeat every 120 seconds
+    task_default_queue=QUEUE_NAME,
+    task_default_exchange='default',
+    task_default_routing_key=QUEUE_NAME,
 )
+
+celery.conf.task_routes = {
+    'knowledgegraph.task.infer_flows': {'queue': QUEUE_NAME},
+}
 
 @signals.celeryd_init.connect
 def init_sentry(**_kwargs):
@@ -53,7 +60,7 @@ class FlowInferenceRequest(BaseModel):
     directory: str
     user_id: str
 
-@celery.task(name="knowledgegraph.task.infer_flows", queue=QUEUE_NAME)
+@celery.task(name="knowledgegraph.task.infer_flows", queue=os.getenv("CELERY_QUEUE_NAME", "staging"))
 def infer_flows(project_id: int, directory: str, user_id: str):
     logger.debug(f"Task received with project_id: {project_id}, directory: {directory}, user_id: {user_id}")
     try:
