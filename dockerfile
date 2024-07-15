@@ -16,6 +16,9 @@ RUN apt-get update && apt-get install -y supervisor
 # Copy the supervisord configuration file
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# Make the shell script executable
+RUN chmod +x /app/start_celery.sh
+
 # Expose the port uvicorn will run on
 EXPOSE 8081
 
