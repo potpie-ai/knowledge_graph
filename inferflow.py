@@ -16,15 +16,12 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 BROKER_URL = os.getenv("BROKER_URL")
-QUEUE_NAME = os.getenv("CELERY_QUEUE_NAME", "staging")
 
 celery = Celery('KnowledgeGraph', broker=BROKER_URL)
 
 celery.conf.update(
     worker_log_format="[%(asctime)s: %(levelname)s/%(processName)s] %(message)s",
     worker_task_log_format="[%(asctime)s: %(levelname)s/%(processName)s] Task %(task_name)s[%(task_id)s] %(message)s",
-    worker_heartbeat=120,  # Send a heartbeat every 120 seconds
-    
 )
 
 @signals.celeryd_init.connect
@@ -40,7 +37,7 @@ class FlowInferenceRequest(BaseModel):
     directory: str
     user_id: str
 
-@celery.task(name="knowledgegraph.task.infer_flows", queue=QUEUE_NAME)
+@celery.task(name="knowledgegraph.task.infer_flows", queue="infer_flow_requests")
 def infer_flows(project_id: int, directory: str, user_id: str):
     logger.debug(f"Task received with project_id: {project_id}, directory: {directory}, user_id: {user_id}")
     try:
