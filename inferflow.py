@@ -34,11 +34,6 @@ else:
 # Initialize the Celery worker
 celery = Celery('KnowledgeGraph', broker=REDIS_URL, backend=REDIS_URL)
 
-# Configure the task routing to use the queue from the environment variable
-celery.conf.task_routes = {
-    '*': {'queue': QUEUE_NAME},
-}
-
 celery.conf.update(
     worker_log_format="[%(asctime)s: %(levelname)s/%(processName)s] %(message)s",
     worker_task_log_format="[%(asctime)s: %(levelname)s/%(processName)s] Task %(task_name)s[%(task_id)s] %(message)s",
@@ -58,7 +53,7 @@ class FlowInferenceRequest(BaseModel):
     directory: str
     user_id: str
 
-@celery.task(name="knowledgegraph.task.infer_flows", queue="infer_flow_requests")
+@celery.task(name="knowledgegraph.task.infer_flows", queue=QUEUE_NAME)
 def infer_flows(project_id: int, directory: str, user_id: str):
     logger.debug(f"Task received with project_id: {project_id}, directory: {directory}, user_id: {user_id}")
     try:
