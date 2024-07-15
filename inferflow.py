@@ -16,6 +16,9 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 BROKER_URL = os.getenv("BROKER_URL")
+QUEUE_NAME = os.getenv("CELERY_QUEUE_NAME", "staging")
+TASK_NAME = "knowledgegraph.task.infer_flows"
+TASK_PICKER = f"{TASK_NAME}.{QUEUE_NAME}"
 
 celery = Celery('KnowledgeGraph', broker=BROKER_URL)
 
@@ -37,7 +40,7 @@ class FlowInferenceRequest(BaseModel):
     directory: str
     user_id: str
 
-@celery.task(name="knowledgegraph.task.infer_flows", queue="infer_flow_requests")
+@celery.task(name=TASK_PICKER, queue="infer_flow_requests")
 def infer_flows(project_id: int, directory: str, user_id: str):
     logger.debug(f"Task received with project_id: {project_id}, directory: {directory}, user_id: {user_id}")
     try:
