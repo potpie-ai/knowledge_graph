@@ -16,22 +16,28 @@ logging.basicConfig(level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 
-# Replace with your Redis instance IP and port
-REDISHOST = os.getenv("REDISHOST")
+# Retrieve Redis connection details from environment variables
+REDISHOST = os.getenv("REDISHOST", "localhost")
 REDISPORT = int(os.getenv("REDISPORT", 6379))
+REDISUSER = os.getenv("REDISUSER", "")
+REDISPASSWORD = os.getenv("REDISPASSWORD", "")
 
-# Initialize the Redis client
-redis_client = redis.StrictRedis(host=REDISHOST, port=REDISPORT)
+# Retrieve the queue name from the environment variable, default to 'staging' if not set
+QUEUE_NAME = os.getenv("CELERY_QUEUE_NAME", "staging")
 
-# Function to convert Redis client to URL
-def redis_client_to_url(client):
-    connection_pool = client.connection_pool
-    return f'redis://{connection_pool.connection_kwargs["host"]}:{connection_pool.connection_kwargs["port"]}/0'
+# Construct the Redis URL including the username and password
+if REDISUSER and REDISPASSWORD:
+    REDIS_URL = f'redis://{REDISUSER}:{REDISPASSWORD}@{REDISHOST}:{REDISPORT}/0'
+else:
+    REDIS_URL = f'redis://{REDISHOST}:{REDISPORT}/0'
 
-# Generate the Redis URL from the client
-REDIS_URL = redis_client_to_url(redis_client)
-
+# Initialize the Celery worker
 celery = Celery('KnowledgeGraph', broker=REDIS_URL, backend=REDIS_URL)
+
+# Configure the task routing to use the queue from the environment variable
+celery.conf.task_routes = {
+    '*': {'queue': QUEUE_NAME},
+}
 
 celery.conf.update(
     worker_log_format="[%(asctime)s: %(levelname)s/%(processName)s] %(message)s",
