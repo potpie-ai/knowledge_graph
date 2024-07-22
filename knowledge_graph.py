@@ -17,7 +17,6 @@ class KnowledgeGraph:
         self.app.add(f"SELECT key, explanation, inference FROM inference WHERE project_id={project_id};", data_type='postgres', loader=self.postgres_loader, metadata={"project_id": project_id})
         self.app.add(f"SELECT * FROM endpoints WHERE project_id={project_id};", data_type='postgres', loader=self.postgres_loader, metadata={"project_id": project_id})
         self.app.add(f"SELECT identifier, explanation FROM explanation WHERE project_id={project_id};", data_type='postgres', loader=self.postgres_loader, metadata={"project_id": project_id})
-        self.app.add(f"SELECT * FROM pydantic WHERE project_id={project_id};", data_type='postgres', loader=self.postgres_loader, metadata={"project_id": project_id})
 
     def query(self, query, project_id):
         project_id = str(project_id)
