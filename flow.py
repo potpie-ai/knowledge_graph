@@ -8,6 +8,7 @@ import hashlib
 import psycopg2
 from github_helper import GithubService
 from graph_db_helper import Neo4jGraph
+from local_git_helper import LocalGitService
 neo4j_graph = Neo4jGraph()
 
 
@@ -50,6 +51,9 @@ class FlowInference:
     def _get_code_for_node(self, node):
         return GithubService.fetch_method_from_repo(node)
     
+    def _get_code_for_node_for_local_repo(self, node):
+        return LocalGitService.fetch_method_from_repo(node)
+    
     def get_flow(self, endpoint_id, project_id):
         flow = ()
         nodes_pro = neo4j_graph.find_outbound_neighbors(
@@ -62,14 +66,22 @@ class FlowInference:
                 flow += (node["neighbor"]["id"],)
         return flow
     
-    def get_code_flow_by_id(self, endpoint_id):
+    def get_code_flow_by_id(self, endpoint_id, user_id): 
         code = ""
         nodes = self.get_flow(endpoint_id, self.project_id)
         for node in nodes:
             node = self.get_node(node)
-            code += (
+            if(os.getenv("isDevelopmentMode") == "enabled" and user_id == "momentum"):
+                code += (
                 "\n"
-                + GithubService.fetch_method_from_repo(node)
+                    + LocalGitService.fetch_method_from_repo(node) #identifier 
+                + "\n code: \n"
+                + self._get_code_for_node_for_local_repo(node)
+                )
+            else:
+                code += (
+                    "\n"
+                    + GithubService.fetch_method_from_repo(node)
                 + "\n code: \n"
                 + self._get_code_for_node(node)
             )
@@ -138,10 +150,10 @@ class FlowInference:
 
         return explanation
 
-    async def generate_overall_explanation(self, endpoint: Dict) -> str:
+    async def generate_overall_explanation(self, endpoint: Dict, user_id: str) -> str:
         conn = psycopg2.connect(os.environ['POSTGRES_SERVER'])
         cursor = conn.cursor()
-        code = self.get_code_flow_by_id(endpoint["identifier"])
+        code = self.get_code_flow_by_id(endpoint["identifier"], user_id)
         print("code", code)
         if code != '':
             code_hash = hashlib.sha256(code.encode('utf-8')).hexdigest()
@@ -193,14 +205,18 @@ class FlowInference:
         conn.close()
         return [x[0] for x in inferences]
     
+    def get_user_id(self):
+        return self.user_id
+    
     async def infer_flows(self) -> Dict[str, str]:
         endpoints = self.get_endpoints()
         inferred_flows = self.get_inferencess()
+        user_id = self.get_user_id()
         flow_explanations = {}
 
         for endpoint in endpoints:
             if endpoint["path"] not in inferred_flows:
-                overall_explanation, code_hash = await self.generate_overall_explanation(endpoint)
+                overall_explanation, code_hash = await self.generate_overall_explanation(endpoint,user_id)
                 if overall_explanation is not None:
                     flow_explanations[endpoint["path"]] = (await self.get_intent_from_explanation(overall_explanation), overall_explanation, code_hash)
 
@@ -213,4 +229,3 @@ async def understand_flows(project_id, directory, user_id):
         flow_inference.insert_inference(key, inference[0], project_id, inference[1], inference[2])
     from knowledge_graph import KnowledgeGraph
     KnowledgeGraph(project_id)
-
