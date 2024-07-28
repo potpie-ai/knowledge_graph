@@ -37,8 +37,9 @@ celery.conf.update(
 
 @signals.celeryd_init.connect
 def init_sentry(**_kwargs):
-    sentry_sdk.init(
-        dsn= os.getenv("SENTRY_CELERY_DSN"),
+    if(os.getenv("isDevelopmentMode") == "disabled"):
+        sentry_sdk.init(
+            dsn= os.getenv("SENTRY_CELERY_DSN"),
         traces_sample_rate=1.0,
         profiles_sample_rate=1.0,
     ) 
