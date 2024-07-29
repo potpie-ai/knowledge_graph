@@ -21,6 +21,3 @@ RUN chmod +x /app/start_celery.sh
 
 # Expose the port uvicorn will run on
 EXPOSE 8081
-
-# Run supervisord
-CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
