@@ -6,9 +6,9 @@ from ai_helper import get_llm_client   , llm_call,print_messages
 from langchain.schema import SystemMessage, HumanMessage
 import hashlib
 import psycopg2
-from github_helper import GithubService
+from git_helpers.github_helper import GithubService
 from graph_db_helper import Neo4jGraph
-from local_git_helper import LocalGitService
+from git_helpers.local_git_helper import LocalGitService
 neo4j_graph = Neo4jGraph()
 
 
