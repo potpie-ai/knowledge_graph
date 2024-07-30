@@ -64,5 +64,4 @@ class LocalGitService:
                 method_content = ''.join(method_lines)
         except Exception as e:
             logger.error(f"An error occurred: {e}", exc_info=True)
-        finally:
-            return method_content
+        return method_content
