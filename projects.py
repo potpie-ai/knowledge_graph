@@ -230,7 +230,6 @@ class ProjectManager:
 
             result = cursor.fetchone()
             if result:
-                print(result)
                 return result
             else:
                 return None

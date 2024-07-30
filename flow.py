@@ -74,14 +74,14 @@ class FlowInference:
             if(os.getenv("isDevelopmentMode") == "enabled" and user_id == "momentum"):
                 code += (
                 "\n"
-                    + LocalGitService.fetch_method_from_repo(node) #identifier 
+                    + endpoint_id
                 + "\n code: \n"
                 + self._get_code_for_node_for_local_repo(node)
                 )
             else:
                 code += (
                     "\n"
-                    + GithubService.fetch_method_from_repo(node)
+                    + endpoint_id
                 + "\n code: \n"
                 + self._get_code_for_node(node)
             )
