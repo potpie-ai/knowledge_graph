@@ -47,8 +47,8 @@ class LocalGitService:
             repo_path = repo_details[0]
             branch_name = repo_details[1]
             repo_path_local = repo_details[2]
-
-            if repo_path_local and repo_path_local.endswith('-momentum'):
+            defaultUsername = os.getenv("defaultUsername")
+            if repo_path_local and repo_path_local.endswith(f'-{defaultUsername}'):
                 repo_path = repo_path_local
 
             file_path = os.path.join(repo_path, node["id"].split(':')[0].lstrip('/'))

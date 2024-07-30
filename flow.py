@@ -71,7 +71,7 @@ class FlowInference:
         nodes = self.get_flow(endpoint_id, self.project_id)
         for node in nodes:
             node = self.get_node(node)
-            if(os.getenv("isDevelopmentMode") == "enabled" and user_id == "momentum"):
+            if(os.getenv("isDevelopmentMode") == "enabled" and user_id == os.getenv("defaultUsername")):
                 code += (
                 "\n"
                     + endpoint_id
