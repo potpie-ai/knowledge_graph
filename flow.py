@@ -205,13 +205,10 @@ class FlowInference:
         conn.close()
         return [x[0] for x in inferences]
     
-    def get_user_id(self):
-        return self.user_id
-    
     async def infer_flows(self) -> Dict[str, str]:
         endpoints = self.get_endpoints()
         inferred_flows = self.get_inferencess()
-        user_id = self.get_user_id()
+        user_id = self.user_id
         flow_explanations = {}
 
         for endpoint in endpoints:
