@@ -66,12 +66,12 @@ class FlowInference:
                 flow += (node["neighbor"]["id"],)
         return flow
     
-    def get_code_flow_by_id(self, endpoint_id, user_id): 
+    def get_code_flow_by_id(self, endpoint_id): 
         code = ""
         nodes = self.get_flow(endpoint_id, self.project_id)
         for node in nodes:
             node = self.get_node(node)
-            if(os.getenv("isDevelopmentMode") == "enabled" and user_id == os.getenv("defaultUsername")):
+            if(os.getenv("isDevelopmentMode") == "enabled" and self.user_id == os.getenv("defaultUsername")):
                 code += (
                 "\n"
                     + endpoint_id
@@ -150,10 +150,10 @@ class FlowInference:
 
         return explanation
 
-    async def generate_overall_explanation(self, endpoint: Dict, user_id: str) -> str:
+    async def generate_overall_explanation(self, endpoint: Dict) -> str:
         conn = psycopg2.connect(os.environ['POSTGRES_SERVER'])
         cursor = conn.cursor()
-        code = self.get_code_flow_by_id(endpoint["identifier"], user_id)
+        code = self.get_code_flow_by_id(endpoint["identifier"], self.user_id)
         print("code", code)
         if code != '':
             code_hash = hashlib.sha256(code.encode('utf-8')).hexdigest()
