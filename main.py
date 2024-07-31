@@ -8,7 +8,7 @@ import os
 load_dotenv(verbose=True, override=True)
 
 
-if os.getenv("ENV") == "production":
+if os.getenv("ENV") == "production" and os.getenv("isDevelopmentMode") == "disabled":
     sentry_sdk.init(
         dsn= os.getenv("SENTRY_KG_DSN"),
         # Set traces_sample_rate to 1.0 to capture 100%
