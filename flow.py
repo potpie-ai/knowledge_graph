@@ -153,8 +153,7 @@ class FlowInference:
     async def generate_overall_explanation(self, endpoint: Dict) -> str:
         conn = psycopg2.connect(os.environ['POSTGRES_SERVER'])
         cursor = conn.cursor()
-        code = self.get_code_flow_by_id(endpoint["identifier"], self.user_id)
-        print("code", code)
+        code = self.get_code_flow_by_id(endpoint["identifier"])
         if code != '':
             code_hash = hashlib.sha256(code.encode('utf-8')).hexdigest()
             cursor.execute("SELECT inference FROM inference WHERE key=%s AND hash=%s", (endpoint["path"], code_hash))
@@ -212,7 +211,7 @@ class FlowInference:
 
         for endpoint in endpoints:
             if endpoint["path"] not in inferred_flows:
-                overall_explanation, code_hash = await self.generate_overall_explanation(endpoint,self.user_id)
+                overall_explanation, code_hash = await self.generate_overall_explanation(endpoint)
                 if overall_explanation is not None:
                     flow_explanations[endpoint["path"]] = (await self.get_intent_from_explanation(overall_explanation), overall_explanation, code_hash)
 
