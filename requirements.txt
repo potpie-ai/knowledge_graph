@@ -48,3 +48,4 @@ pydantic_core==2.18.4
 certifi
 sentry-sdk[celery]
 flower
+gitPython

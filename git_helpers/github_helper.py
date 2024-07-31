@@ -44,6 +44,7 @@ class GithubService:
     @staticmethod
     def fetch_method_from_repo(node):
         method_content = None
+        github = None
         try:
             project_id = node["project_id"]
             project_manager = ProjectManager()
@@ -55,23 +56,25 @@ class GithubService:
             start_line = node["start"]
             end_line = node["end"]
 
-            response, auth, owner = GithubService.get_github_repo_details(
+            response, auth, _ = GithubService.get_github_repo_details(
                 repo_name
             )
+
             if response.status_code != 200:
                 raise HTTPException(
                     status_code=400, detail="Failed to get installation ID"
                 )
+
             app_auth = auth.get_installation_auth(response.json()["id"])
             github = Github(auth=app_auth)
             repo = github.get_repo(repo_name)
-            file_contents = repo.get_contents(file_path, ref=branch_name)
+            file_contents = repo.get_contents(file_path.replace("\\","/"), ref=branch_name)
             decoded_content = base64.b64decode(file_contents.content).decode('utf-8')
             lines = decoded_content.split('\n')
             method_lines = lines[start_line - 1:end_line]
             method_content = '\n'.join(method_lines)
+
         except Exception as e:
             logger.error(f"An error occurred: {e}", exc_info=True)
-        finally:
-            #github.close()
-            return method_content
+            
+        return method_content

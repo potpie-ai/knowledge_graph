@@ -223,7 +223,7 @@ class ProjectManager:
             conn = psycopg2.connect(os.getenv("POSTGRES_SERVER"))
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT repo_name, branch_name
+                SELECT repo_name, branch_name, directory
                 FROM projects 
                 WHERE id = %s
             """, (project_id, ))
