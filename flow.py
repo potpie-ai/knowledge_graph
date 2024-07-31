@@ -207,13 +207,12 @@ class FlowInference:
     
     async def infer_flows(self) -> Dict[str, str]:
         endpoints = self.get_endpoints()
-        inferred_flows = self.get_inferencess()
-        user_id = self.user_id
+        inferred_flows = self.get_inferencess() 
         flow_explanations = {}
 
         for endpoint in endpoints:
             if endpoint["path"] not in inferred_flows:
-                overall_explanation, code_hash = await self.generate_overall_explanation(endpoint,user_id)
+                overall_explanation, code_hash = await self.generate_overall_explanation(endpoint,self.user_id)
                 if overall_explanation is not None:
                     flow_explanations[endpoint["path"]] = (await self.get_intent_from_explanation(overall_explanation), overall_explanation, code_hash)
 
